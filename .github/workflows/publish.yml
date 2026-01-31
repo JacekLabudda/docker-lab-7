@@ -19,7 +19,7 @@ jobs:
 
       - name: Budowanie testowego obrazu
         run: |
-          docker build --target test -f Dockerfile.test -t docker-lab-7:test .
+          docker build --target test -t docker-lab-7:test .
 
       - name: Uruchamianie testów
         run: |
