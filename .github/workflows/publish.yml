@@ -3,7 +3,7 @@ name: Testy, budowanie i publikacja obrazu Docker'owego
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   docker:
