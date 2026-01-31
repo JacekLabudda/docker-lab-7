@@ -23,7 +23,6 @@ Celem projektu jest zapoznanie się z:
 ├── app.py
 ├── test_app.py
 ├── Dockerfile
-├── requirements-dev.txt
 ├── .github/
 │   └── workflows/
 │       └── publish.yml
@@ -54,7 +53,7 @@ Celem projektu jest zapoznanie się z:
 
 7️⃣ Wprowadź sekrety do **GitHub** w repozytorium:
 - `DOCKERHUB_USERNAME` - Twój login do **Docker Hub**
-- `DOCKERHUB_TOKEN` - token dostępu wygenerowany w **Docker Hub**
+- `DOCKERHUB_TOKEN` - Twoje hasło do **Docker Hub**
 
 ## Modyfikacja i push zmian
 1️⃣ Zmodyfikuj pliki w repo, np. `app.py` lub `test_app.py`.
