@@ -1,69 +1,92 @@
-# Docker – bezpieczeństwo, anty-wzorce i typowe błędy
+# Docker – CI/CD, GitHub Actions i publikacja obrazu Docker
 
 Repozytorium demonstracyjne do zajęć:
 
 **Docker i konteneryzacja - od podstaw do środowisk produkcyjnych**
 
-Projekt przedstawia bardzo prostą aplikację w Pythonie, uruchamianą w kontenerze Docker, która komunikuje się z zewnętrznym, publicznym API.  
+Projekt przedstawia prostą aplikację w Pythonie, która losuje tekst z listy i wypisuje go w konsoli. Aplikacja jest konteneryzowana w Dockerze i publikowana do **Docker Hub** przy użyciu **GitHub Actions**.
 
-Celem ćwiczenia jest **analiza konfiguracji Dockera i aspektów bezpieczeństwa**, a nie logika biznesowa.
+Celem ćwiczenia jest **zapoznanie się z procesem CI/CD w praktyce**, publikacją obrazu Docker oraz uruchamianiem go na różnych maszynach.
 
 ---
 
 ## Cel projektu
 Celem projektu jest zapoznanie się z:
-- rzeczywistymi problemami bezpieczeństwa w projektach Dockerowych
-- sposobem przekazywania wrażliwych danych do aplikacji
-- konsekwencjami złych decyzji konfiguracyjnych
-- analizą obrazu, kontenera i jego relacji z hostem
-
-Projekt **nie jest przykładem dobrych praktyk**.  
-Wręcz przeciwnie, ponieważ zawiera wiele rozwiązań, które w środowisku produkcyjnym byłyby nieakceptowalne.
-
-Aplikacja:
-- działa jako prosty backend HTTP (Flask)
-- przy starcie pobiera dane z zewnętrznego API pogodowego
-- zwraca dane w formacie JSON
-- do komunikacji z API używa klucza dostępowego
+- tworzeniem i konteneryzacją prostej aplikacji Python w Dockerze,
+- konfiguracją **GitHub Actions** dla testów i publikacji obrazu,
+- korzystaniem z **Docker Hub** jako registry obrazów,
+- uruchamianiem obrazu Dockera lokalnie lub na innych komputerach.
 
 ## Struktura repozytorium
 ```text
 .
 ├── app.py
+├── test_app.py
 ├── Dockerfile
-├── docker-compose.yml
-├── .env.example
+├── requirements-dev.txt
+├── .github/
+│   └── workflows/
+│       └── publish.yml
 └── README.md
 ```
-- `app.py` - aplikacja Python/Flask
-- `.env.example` - przykładowy plik zmiennych środowiskowych
-- `docker-compose.yml` - konfiguracja środowisk Compose
+- `app.py` - aplikacja Python losująca tekst
+- `test_app.py` - prosty test pytest sprawdzający, że aplikacja generuje tekst
+- `Dockerfile` - budowanie obrazów: testowy i produkcyjny
+- `.github/workflows/publish.yml` - workflow **GitHub Actions** publikujący obraz
 
 ## Przygotowanie projektu (ważne)
-Projekt korzysta z pliku `.env` do konfiguracji zmiennych środowiskowych.
+1️⃣ Załóż konto na GitHubie (jeśli jeszcze go nie masz): https://github.com
 
-1️⃣ Skopiuj plik `.env`
+2️⃣ W prawym górnym rogu obecnego repozytorium kliknij przycisk **Fork**
 
-Przed pierwszym uruchomieniem koniecznie wykonaj:
-```shell
-  cp .env.example .env
+3️⃣ Wybierz swoje konto jako miejsce utworzenia fork’a
+
+4️⃣ Po chwili GitHub utworzy kopię repozytorium w Twoim koncie:  
+`https://github.com/<TwojLogin>/docker-lab-7`
+
+5️⃣ Teraz możesz sklonować repozytorium na komputer:
+```bash
+  git clone https://github.com/<TwojLogin>/docker-lab-7.git
+  cd docker-lab-7
 ```
 
-Następnie możesz (opcjonalnie) dostosować wartość w pliku `.env`.
+6️⃣ Załóż konto na [Docker Hub](https://hub.docker.com/) jeśli jeszcze go nie masz.
 
-## Jak uruchomić
-### 2️⃣ Uruchom środowisko
-```shell
-  docker compose up --build
+7️⃣ Wprowadź sekrety do **GitHub** w repozytorium:
+- `DOCKERHUB_USERNAME` - Twój login do **Docker Hub**
+- `DOCKERHUB_TOKEN` - token dostępu wygenerowany w **Docker Hub**
+
+## Modyfikacja i push zmian
+1️⃣ Zmodyfikuj pliki w repo, np. `app.py` lub `test_app.py`.
+
+2️⃣ Zacommituj zmiany i wypchnij na **GitHub**:
+```bash
+  git add .
+  git commit -m "Zmiany w aplikacji"
+  git push origin master
 ```
-Po uruchomieniu aplikacja będzie dostępna pod adresem: http://localhost:5555
-### 3️⃣ Zatrzymanie środowiska
-```shell
-  docker compose down
+
+3️⃣ Po push'u **GitHub Actions** automatycznie:
+- zbuduje testowy obraz Dockera z pytestem, 
+- uruchomi testy w kontenerze, 
+- jeśli testy przejdą, zbuduje produkcjny obraz, 
+- opublikuje go do Docker Hub (`<TwojLogin>/docker-lab-7:latest`).
+
+## Uruchomienie obrazu
+
+Na swoim komputerze lub innym:
+```bash
+  docker run --rm <TwojLogin>/docker-lab-7:latest
 ```
+Przykładowy output:
+```text
+Python jest super
+```
+Każde uruchomienie wypisuje losowy tekst z listy.
 
 ## Uwagi
-- Projekt jest celowo uproszczony
-- Kod aplikacji nie jest celem ćwiczenia
-- Niektóre decyzje konfiguracyjne są **świadomie kontrowersyjne**
-- Repozytorium symuluje sytuacje spotykane w prawdziwych projektach
+- Projekt jest celowo uproszczony, aby skupić się na **CI/CD** i **Dockerze** 
+- Testy w tym projekcie to **smoke test** - sprawdzają tylko, że aplikacja coś generuje 
+- Workflow **GitHub Actions** uruchamia testy wewnątrz kontenera, co symuluje praktykę profesjonalnego CI/CD 
+- Publikacja do **Docker Hub** umożliwia uruchamianie obrazu na dowolnym komputerze 
+- Repozytorium pokazuje typowy proces: **modyfikacja kodu → push → testy → build → publikacja → uruchomienie obrazu**
