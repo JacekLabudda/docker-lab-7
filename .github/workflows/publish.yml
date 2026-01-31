@@ -1,0 +1,40 @@
+name: Testy, budowanie i publikacja obrazu Docker'owego
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Pobieranie repozytorium kodu
+        uses: actions/checkout@v4
+
+      - name: Budowanie testowego obrazu
+        run: |
+          docker build --target test -f Dockerfile.test -t docker-lab-7:test .
+
+      - name: Uruchamianie testów
+        run: |
+          docker run --rm docker-lab-7:test
+
+      - name: Logowanie do registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Budowanie obrazu produkcyjnego
+        run: |
+          docker build --target prod -t ${{ secrets.DOCKERHUB_USERNAME }}/docker-lab-7:latest .
+
+      - name: Publikowanie obrazu
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/docker-lab-7:latest
